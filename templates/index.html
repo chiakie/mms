@@ -1,0 +1,200 @@
+<html>
+<head>
+    <link rel="stylesheet" href="resources/css/tether.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/bootstrap-datetimepicker.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/bootstrap-dialog.min.css" type="text/css"/>
+
+
+    <script src="resources/js/jquery-1.11.3.min.js"></script>
+    <script src="resources/js/tether.min.js"></script>
+    <script src="resources/js/bootstrap.min.js"></script>
+    <script src="resources/js/moment.min.js"></script>
+    <script src="resources/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="resources/js/bootstrap-dialog.min.js"></script>
+
+    <style>
+        #m_table {
+            width: 100%;
+            margin: 10px auto;
+        }
+
+        .container {
+            width: 70%;
+            margin: 0 auto;
+        }
+
+        #newBox {
+            display:none;
+        }
+
+        #btn_create {
+            margin-bottom:5px;
+        }
+    </style>
+
+    <script>
+        /**
+         * Migrating to bootstrap v4
+         * http://v4-alpha.getbootstrap.com/migration/
+         */
+        function migrateBootstrapV4() {
+            /* Renamed .btn-default to .btn-secondary. */
+            $('.btn-default').removeClass('btn-default').addClass('btn-secondary');
+            /* Added .float-{xs,sm,md,lg,xl}-{left,right,none} classes for responsive floats and
+             removed .pull-left and .pull-right since they’re redundant to .float-xs-left and .float-xs-right. */
+            $('.pull-left').removeClass('pull-left').addClass('float-xs-left');
+            $('.pull-right').removeClass('pull-right').addClass('float-xs-right');
+            /* Explicit classes (.page-item, .page-link) are now required on the descendants of .paginations */
+            $('.page-pre').addClass('page-item');
+            $('.page-next').addClass('page-item');
+            $('.page-number').addClass('page-item');
+            $('.page-first').addClass('page-item');
+            $('.page-first-separator').addClass('page-item');
+            $('.page-last').addClass('page-item');
+            $('.page-last-separator').addClass('page-item');
+            $('.page-item').find('a').addClass('page-link');
+            /* Dropdown items now require .dropdown-item. */
+            $('.dropdown-menu').find('li').find('a').addClass('dropdown-item');
+            /* Dropped .help-block and replaced it with .form-text for block-level help text. */
+            //$('.help-block').addClass('text-danger');
+        }
+
+        function deleteRow(row) {
+            $tr = $(row).closest("tr");
+            $tr.remove()
+        }
+
+        function openCreateDiv() {
+            var $box = $("#newBox");
+            var $btn = $("#btn_create")
+            if ($btn.text() == "新增") {
+                $box.show();
+                $btn.text("關閉");
+            }
+            else {
+                $box.hide();
+                $btn.text("新增");
+            }
+        }
+
+        function submit() {
+            var s = $("#add_marquee_form").serialize();
+            fetch('/add', {
+                method: 'post',
+                headers: new Headers({
+                    'Content-Type': 'application/json'
+                }),
+                body: JSON.stringify({
+                    title: document.getElementById('title').value,
+                    start_time: document.getElementById('start').value,
+                    end_time: document.getElementById('end').value
+                })
+            }).then(function(response) {
+                if (!response.ok) {
+                    throw new Error(response.statusText)
+                }
+                return response.json();
+            }).then(function(jsonData) {
+                var marquee = JSON.parse(jsonData.data);
+                addRow(marquee);
+            }).catch(function(err) {
+
+            });
+        }
+
+        function addRow(data) {
+            var $table = $('#m_table');
+            $table.append('<tr><td></td></tr>');
+        }
+
+        function createToggle() {
+            BootstrapDialog.show({
+                type: BootstrapDialog.TYPE_SUCCESS,
+                size: BootstrapDialog.SIZE_WIDE,
+                title: "新增跑馬燈內容",
+                message: function(dialogRef) {
+                    return "1234";
+                },
+                closable: true,
+                draggable: true,
+                onShow: function(dialogRef) {
+
+                },
+                buttons:[{
+                    label: '新增',
+                    cssClass: 'btn-success',
+                    action: function(dialogRef) {
+
+                    }
+                }, {
+                    label: '取消',
+                    action: function(dialogRef) {
+                        dialogRef.close();
+                    }
+                }]
+            });
+        }
+
+        $(function() {
+            migrateBootstrapV4();
+
+            $('.datetimepicker').datetimepicker({
+                format: 'yyyy-mm-dd hh:ii:ss'
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <button id="btn_create" class="btn btn-success" onclick="createToggle()">新增</button>
+    <div id="newBox" class="card">
+        <div class="card-header">
+            <h5>建立新的跑馬燈排程</h5>
+        </div>
+        <div class="card-block form-group">
+            <table>
+                <tr>
+                    <th>跑馬燈內容</th>
+                    <td><input type="text" class="form-control" id="title"></td>
+                </tr>
+                <tr>
+                    <th>開始時間</th>
+                    <td><input type="text" class="form-control datetimepicker" id="start"></td>
+                </tr>
+                <tr>
+                    <th>結束時間</th>
+                    <td><input type="text" class="form-control datetimepicker" id="end"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-success" onclick="submit()">建立</button>
+        </div>
+    </div>
+    <table class="table table-striped" id="m_table">
+        <tr>
+            <th>序號</th>
+            <th>內容</th>
+            <th>起屎時間</th>
+            <th>劫數時間</th>
+            <th>管理</th>
+        </tr>
+        {{ range .marquees }}
+        <tr id="row-{{.Seq}}">
+            <td>{{.Seq}}</td>
+            <td>{{.Title}}</td>
+            <td>{{.StartTime}}</td>
+            <td>{{.EndTime}}</td>
+            <td>
+                <button class="btn btn-danger" onclick="deleteRow(this, '{{.Seq}}')">刪除</button>
+                <button class="btn btn-info">編輯</button>
+            </td>
+        </tr>
+        {{ end }}
+    </table>
+</div>
+
+</body>
+
+</html>
