@@ -5,14 +5,10 @@ import (
 	"net/http"
 	"fmt"
 	"encoding/json"
-	"marquee/orm"
+	"mms/orm"
+	"mms/domain"
+	"strconv"
 )
-
-type Marquee struct {
-	Title     string `json:"title" binding:"required"`
-	StartTime string `json:"start_time" binding:"required"`
-	EndTime   string `json:"end_time"  binding:"required"`
-}
 
 func main() {
 	router := gin.Default()
@@ -27,7 +23,7 @@ func main() {
 	})
 
 	router.POST("/add", func(c *gin.Context){
-		var mcGee Marquee
+		var mcGee domain.McGee
 		err := c.Bind(&mcGee)
 		if err != nil {
 			fmt.Println(err)
@@ -36,11 +32,60 @@ func main() {
 			})
 		}
 
+		var marquee orm.Marquee
+		marquee.Title = mcGee.Title
+		marquee.StartTime = mcGee.StartTime
+		marquee.EndTime = mcGee.EndTime
+		orm.AddMarquee(marquee)
+
 		blob, _ := json.Marshal(mcGee)
+		c.JSON(http.StatusOK, gin.H{
+			"result": "ok",
+			"data": string(blob),
+		})
+	})
+
+	router.GET("/del/:seq", func(c *gin.Context) {
+		seq, _ := strconv.Atoi(c.Param("seq"))
+		orm.DelMarquee(seq)
 
 		c.JSON(http.StatusOK, gin.H{
-			"result": "OK",
-			"data": string(blob),
+			"result": "ok",
+		})
+	})
+
+	router.GET("/edit/:seq", func(c *gin.Context) {
+		seq, _ := strconv.Atoi(c.Param("seq"))
+
+		marquee, err := orm.GetSingleMarquee(seq)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"result": "failed",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"result": "ok",
+			"data": marquee,
+		})
+	})
+
+	router.POST("/edit/:seq", func(c *gin.Context) {
+		seq, _ := strconv.Atoi(c.Param("seq"))
+
+		var mcGee domain.McGee
+		err := c.Bind(&mcGee)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"result": "Failed",
+			})
+		}
+
+		orm.UpdMarquee(seq, mcGee)
+
+		c.JSON(http.StatusOK, gin.H{
+			"result": "ok",
 		})
 	})
 

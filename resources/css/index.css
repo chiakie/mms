@@ -1,0 +1,22 @@
+#m_table {
+    width: 100%;
+    margin: 10px auto;
+}
+
+.container {
+    width: 70%;
+    margin: 0 auto;
+}
+
+#btn_create {
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+.form-group.date{
+    width:30%;
+}
+
+.form-group.title {
+    width:100%;
+}

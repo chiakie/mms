@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="resources/css/bootstrap.min.css" type="text/css"/>
     <link rel="stylesheet" href="resources/css/bootstrap-datetimepicker.min.css" type="text/css"/>
     <link rel="stylesheet" href="resources/css/bootstrap-dialog.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/index.css" type="text/css"/>
 
 
     <script src="resources/js/jquery-1.11.3.min.js"></script>
@@ -13,31 +14,115 @@
     <script src="resources/js/bootstrap-datetimepicker.min.js"></script>
     <script src="resources/js/bootstrap-dialog.min.js"></script>
 
-    <style>
-        #m_table {
-            width: 100%;
-            margin: 10px auto;
-        }
-
-        .container {
-            width: 70%;
-            margin: 0 auto;
-        }
-
-        #newBox {
-            display:none;
-        }
-
-        #btn_create {
-            margin-bottom:5px;
-        }
-    </style>
-
     <script>
-        /**
-         * Migrating to bootstrap v4
-         * http://v4-alpha.getbootstrap.com/migration/
-         */
+        function deleteRow(row, seq) {
+            $(row).closest("tr").remove();
+
+            fetch("/del/"+seq, {
+                method: 'GET'
+            }).then(function(response) {
+                if (!response.ok) {
+                    throw new Error(response.statusText)
+                }
+                return response.json();
+            }).catch(function(err) {
+                alert(err);
+            });
+        }
+
+        function showDialog(action, seq) {
+            var dialogTitle;
+            var url;
+            var dialogType;
+            var btnClass;
+            var btnLabel;
+            if (action == 'add') {
+                dialogType = BootstrapDialog.TYPE_SUCCESS;
+                dialogTitle = '新增跑馬燈內容';
+                url = '/add';
+                btnClass = 'btn-success';
+                btnLabel = '新增';
+            } else if (action == 'edit') {
+                dialogType = BootstrapDialog.TYPE_INFO;
+                dialogTitle = '修改跑馬燈內容';
+                url = '/edit/'+seq;
+                btnClass = 'btn-info';
+                btnLabel = ' 修改';
+            }
+
+            BootstrapDialog.show({
+                type: dialogType,
+                size: BootstrapDialog.SIZE_WIDE,
+                title: dialogTitle,
+                message: function(dialogRef) {
+                    var $message = $('<div><div class="alert alert-danger" role="alert" style="display: none;"></div></div>');
+                    var $content = $('temp #createMarqueeDialog').clone();
+                    $message.append($content);
+                    return $message;
+                },
+                closable: true,
+                draggable: true,
+                onshow: function(dialogRef) {
+                    if (action == 'edit') {
+                        fetch(url, {
+                            method: 'GET'
+                        }).then(function(response) {
+                            if (!response.ok) {
+                                throw new Error(response.statusText)
+                            }
+                            return response.json();
+                        }).then(function(jsonData) {
+                            dialogRef.$modalBody.find("#title")[0].value = jsonData.data.Title;
+                            dialogRef.$modalBody.find("#start")[0].value = jsonData.data.StartTime;
+                            dialogRef.$modalBody.find("#end")[0].value = jsonData.data.EndTime;
+                        }).catch(function(err) {
+                            alert(err);
+                        });
+                    }
+
+                    dialogRef.$modalBody.find('.datetimepicker').each(function(index) {
+                        $(this).datetimepicker({
+                            useCurrent: true,
+                            sideBySide: true,
+                            format:'YYYY-MM-DD HH:mm:ss'
+                        });
+                    });
+                },
+                buttons:[{
+                    label: btnLabel,
+                    cssClass: btnClass,
+
+                    action: function(dialogRef) {
+                        fetch(url, {
+                            method: 'POST',
+                            headers: new Headers({
+                                'Content-Type': 'application/json'
+                            }),
+                            body: JSON.stringify({
+                                title: dialogRef.$modalBody.find('#title')[0].value,
+                                start_time: dialogRef.$modalBody.find('#start')[0].value,
+                                end_time: dialogRef.$modalBody.find('#end')[0].value
+                            })
+                        }).then(function(response) {
+                            if (!response.ok) {
+                                throw new Error(response.statusText)
+                            }
+                            return response.json();
+                        }).then(function(jsonData) {
+                            dialogRef.close();
+                        }).catch(function(err) {
+                            alert(err);
+                        });
+                    }
+                }, {
+                    label: '取消',
+                    action: function(dialogRef) {
+                        dialogRef.close();
+                    }
+                }]
+            });
+        }
+
         function migrateBootstrapV4() {
             /* Renamed .btn-default to .btn-secondary. */
             $('.btn-default').removeClass('btn-default').addClass('btn-secondary');
@@ -60,124 +145,20 @@
             //$('.help-block').addClass('text-danger');
         }
 
-        function deleteRow(row) {
-            $tr = $(row).closest("tr");
-            $tr.remove()
-        }
-
-        function openCreateDiv() {
-            var $box = $("#newBox");
-            var $btn = $("#btn_create")
-            if ($btn.text() == "新增") {
-                $box.show();
-                $btn.text("關閉");
-            }
-            else {
-                $box.hide();
-                $btn.text("新增");
-            }
-        }
-
-        function submit() {
-            var s = $("#add_marquee_form").serialize();
-            fetch('/add', {
-                method: 'post',
-                headers: new Headers({
-                    'Content-Type': 'application/json'
-                }),
-                body: JSON.stringify({
-                    title: document.getElementById('title').value,
-                    start_time: document.getElementById('start').value,
-                    end_time: document.getElementById('end').value
-                })
-            }).then(function(response) {
-                if (!response.ok) {
-                    throw new Error(response.statusText)
-                }
-                return response.json();
-            }).then(function(jsonData) {
-                var marquee = JSON.parse(jsonData.data);
-                addRow(marquee);
-            }).catch(function(err) {
-
-            });
-        }
-
-        function addRow(data) {
-            var $table = $('#m_table');
-            $table.append('<tr><td></td></tr>');
-        }
-
-        function createToggle() {
-            BootstrapDialog.show({
-                type: BootstrapDialog.TYPE_SUCCESS,
-                size: BootstrapDialog.SIZE_WIDE,
-                title: "新增跑馬燈內容",
-                message: function(dialogRef) {
-                    return "1234";
-                },
-                closable: true,
-                draggable: true,
-                onShow: function(dialogRef) {
-
-                },
-                buttons:[{
-                    label: '新增',
-                    cssClass: 'btn-success',
-                    action: function(dialogRef) {
-
-                    }
-                }, {
-                    label: '取消',
-                    action: function(dialogRef) {
-                        dialogRef.close();
-                    }
-                }]
-            });
-        }
-
         $(function() {
-            migrateBootstrapV4();
-
-            $('.datetimepicker').datetimepicker({
-                format: 'yyyy-mm-dd hh:ii:ss'
-            });
+            //migrateBootstrapV4();
         });
     </script>
 </head>
 <body>
 <div class="container">
-    <button id="btn_create" class="btn btn-success" onclick="createToggle()">新增</button>
-    <div id="newBox" class="card">
-        <div class="card-header">
-            <h5>建立新的跑馬燈排程</h5>
-        </div>
-        <div class="card-block form-group">
-            <table>
-                <tr>
-                    <th>跑馬燈內容</th>
-                    <td><input type="text" class="form-control" id="title"></td>
-                </tr>
-                <tr>
-                    <th>開始時間</th>
-                    <td><input type="text" class="form-control datetimepicker" id="start"></td>
-                </tr>
-                <tr>
-                    <th>結束時間</th>
-                    <td><input type="text" class="form-control datetimepicker" id="end"></td>
-                </tr>
-            </table>
-        </div>
-        <div class="card-footer">
-            <button class="btn btn-success" onclick="submit()">建立</button>
-        </div>
-    </div>
+    <button id="btn_create" class="btn btn-success" onclick="showDialog('add')">新增</button>
     <table class="table table-striped" id="m_table">
         <tr>
             <th>序號</th>
             <th>內容</th>
-            <th>起屎時間</th>
-            <th>劫數時間</th>
+            <th>開始時間</th>
+            <th>結束時間</th>
             <th>管理</th>
         </tr>
         {{ range .marquees }}
@@ -188,12 +169,39 @@
             <td>{{.EndTime}}</td>
             <td>
                 <button class="btn btn-danger" onclick="deleteRow(this, '{{.Seq}}')">刪除</button>
-                <button class="btn btn-info">編輯</button>
+                <button class="btn btn-info" onclick="showDialog('edit', '{{.Seq}}')">編輯</button>
             </td>
         </tr>
         {{ end }}
     </table>
 </div>
+<temp style="display:none;">
+    <div id="createMarqueeDialog">
+        <div class="form-group title">
+            <label>跑馬燈內容</label>
+            <input type="text" class="form-control" id="title">
+        </div>
+        <div class="form-group date">
+            <label>開始時間</label>
+            <div class='input-group date datetimepicker'>
+                <input type="text" class="form-control" id="start" />
+                <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+            </div>
+        </div>
+        <div class="form-group date">
+            <label>結束時間</label>
+            <div class='input-group date datetimepicker'>
+                <input type="text" class="form-control" id="end" />
+                <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+            </div>
+        </div>
+
+    </div>
+</temp>
 
 </body>
 
