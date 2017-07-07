@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"encoding/json"
 	"mms/orm"
-	"mms/domain"
 	"strconv"
+	"mms/domain"
 )
 
 func main() {
@@ -74,15 +74,16 @@ func main() {
 	router.POST("/edit/:seq", func(c *gin.Context) {
 		seq, _ := strconv.Atoi(c.Param("seq"))
 
-		var mcGee domain.McGee
-		err := c.Bind(&mcGee)
+		var mcgee domain.McGee
+		err := c.Bind(&mcgee)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"result": "Failed",
 			})
 		}
 
-		orm.UpdMarquee(seq, mcGee)
+		marqueeData := orm.Marquee{Seq:seq, Title:mcgee.Title, StartTime:mcgee.StartTime, EndTime:mcgee.EndTime}
+		orm.UpdMarquee(marqueeData)
 
 		c.JSON(http.StatusOK, gin.H{
 			"result": "ok",

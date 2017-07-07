@@ -3,11 +3,11 @@ package orm
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"mms/domain"
+	"fmt"
 )
 
 type Marquee struct {
-	Seq uint
+	Seq int `gorm:"primary_key"`
 	Title string
 	StartTime string
 	EndTime string
@@ -20,6 +20,11 @@ func init() {
 	gdb, err = gorm.Open("sqlite3", "marquee.db");
 	if err != nil {
 		panic("failed to connect database")
+	}
+
+	err = gdb.AutoMigrate(Marquee{}).Error
+	if err != nil {
+		panic(fmt.Sprintf("AutoMigration Failed: %s", err))
 	}
 }
 
@@ -39,31 +44,30 @@ func GetSingleMarquee(seq int) (Marquee, error) {
 	var m Marquee
 	err := gdb.Where("seq = ?", seq).First(&m).Error
 	if err != nil {
-
+		fmt.Println(err)
 	}
-	return m, err;
+	return m, err
 }
 
 func GetMarquees() []Marquee {
 	var marquees []Marquee
 	err := gdb.Order("start_time desc").Find(&marquees).Error
 	if err != nil {
-
+		fmt.Println(err)
 	}
 	return marquees
 }
 
-func UpdMarquee(seq int, m interface{}) {
-	mcgee := m.(domain.McGee)
-	err := gdb.Model(Marquee{}).Where("seq = ?", seq).Updates(map[string]interface{}{"title": mcgee.Title, "start_time":mcgee.StartTime, "end_time":mcgee.EndTime}).Error
+func UpdMarquee(m Marquee) {
+	err := gdb.Save(&m).Error
 	if err != nil {
-
+		fmt.Println(err)
 	}
 }
 
 func DelMarquee(seq int) {
 	err := gdb.Where("seq = ?", seq).Delete(Marquee{}).Error
 	if err != nil {
-
+		fmt.Println(err)
 	}
 }
