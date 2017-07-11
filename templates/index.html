@@ -28,13 +28,13 @@
         <form id="form">
             <div class="form-group title">
                 <label>跑馬燈內容</label>
-                <input type="text" class="form-control" id="title" required/>
+                <input type="text" class="form-control" id="title" maxlength="64" data-error="*此為必填欄位" placeholder="請輸入文字, 最多64字元" required/>
                 <div class="help-block with-errors"></div>
             </div>
             <div class="form-group date">
                 <label>開始時間</label>
                 <div class='input-group datetimepicker'>
-                    <input type="text" class="form-control" id="start" required/>
+                    <input type="text" class="form-control" id="start" maxlength="64" data-error="*此為必填欄位" placeholder="請選擇日期" required/>
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -44,7 +44,7 @@
             <div class="form-group date">
                 <label>結束時間</label>
                 <div class='input-group datetimepicker'>
-                    <input type="text" class="form-control" id="end" required/>
+                    <input type="text" class="form-control" id="end" maxlength="64" data-error="*此為必填欄位" placeholder="請選擇日期" required/>
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
