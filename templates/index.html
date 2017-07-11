@@ -15,7 +15,8 @@
     <script src="resources/js/bootstrap-datetimepicker.min.js"></script>
     <script src="resources/js/bootstrap-dialog.min.js"></script>
     <script src="resources/js/bootstrap-table.min.js"></script>
-    <script src="resources/js/Sortable.min.js"></script>
+    <script src="resources/js/validator.min.js"></script>
+    <!--<script src="resources/js/Sortable.min.js"></script>-->
 </head>
 <body>
 <div class="container">
@@ -24,29 +25,33 @@
 </div>
 <temp style="display:none;">
     <div id="createMarqueeDialog">
-        <div class="form-group title">
-            <label>跑馬燈內容</label>
-            <input type="text" class="form-control" id="title">
-        </div>
-        <div class="form-group date">
-            <label>開始時間</label>
-            <div class='input-group datetimepicker'>
-                <input type="text" class="form-control" id="start" />
-                <span class="input-group-addon">
+        <form id="form">
+            <div class="form-group title">
+                <label>跑馬燈內容</label>
+                <input type="text" class="form-control" id="title" required/>
+                <div class="help-block with-errors"></div>
+            </div>
+            <div class="form-group date">
+                <label>開始時間</label>
+                <div class='input-group datetimepicker'>
+                    <input type="text" class="form-control" id="start" required/>
+                    <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
+                </div>
+                <div class="help-block with-errors"></div>
             </div>
-        </div>
-        <div class="form-group date">
-            <label>結束時間</label>
-            <div class='input-group datetimepicker'>
-                <input type="text" class="form-control" id="end" />
-                <span class="input-group-addon">
+            <div class="form-group date">
+                <label>結束時間</label>
+                <div class='input-group datetimepicker'>
+                    <input type="text" class="form-control" id="end" required/>
+                    <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
+                </div>
+                <div class="help-block with-errors"></div>
             </div>
-        </div>
-
+        </form>
     </div>
 </temp>
 <script>
@@ -166,6 +171,7 @@
             closable: true,
             draggable: true,
             onshow: function(dialogRef) {
+                dialogRef.$modalBody.find('#form').first().validator();
                 if (action == 'edit') {
                     fetch(url, {
                         method: 'GET'
@@ -194,8 +200,11 @@
             buttons:[{
                 label: btnLabel,
                 cssClass: btnClass,
-
                 action: function(dialogRef) {
+                    if (dialogRef.$modalBody.find('#form').first().validator('validate').has('.has-error').length > 0) {
+                        return; /* See https://github.com/1000hz/bootstrap-validator/issues/148 */
+                    }
+
                     fetch(url, {
                         method: 'POST',
                         headers: new Headers({
@@ -228,9 +237,7 @@
     }
 
     function refreshTable() {
-        $('#table').bootstrapTable('refresh', {
-            silent:true
-        })
+        $('#table').bootstrapTable('refresh', {silent:true});
     }
 
     $(function() {

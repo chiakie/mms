@@ -36,7 +36,7 @@ func (Marquee) TableName() string {
 func AddMarquee(m Marquee) {
 	err := gdb.Create(&m).Error
 	if err != nil {
-
+		fmt.Println(err)
 	}
 }
 
