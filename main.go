@@ -16,10 +16,12 @@ func main() {
 	router.StaticFS("/resources", gin.Dir("resources", false))
 
 	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{})
+	})
+
+	router.GET("/data", func(c *gin.Context) {
 		data := orm.GetMarquees()
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"marquees":data,
-		})
+		c.JSON(http.StatusOK, data)
 	})
 
 	router.POST("/add", func(c *gin.Context){
@@ -28,8 +30,9 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 			c.JSON(http.StatusOK, gin.H{
-				"result": "Failed",
+				"result": "failed",
 			})
+			return
 		}
 
 		var marquee orm.Marquee
@@ -78,8 +81,9 @@ func main() {
 		err := c.Bind(&mcgee)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
-				"result": "Failed",
+				"result": "failed",
 			})
+			return
 		}
 
 		marqueeData := orm.Marquee{Seq:seq, Title:mcgee.Title, StartTime:mcgee.StartTime, EndTime:mcgee.EndTime}

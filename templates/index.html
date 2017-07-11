@@ -1,11 +1,12 @@
 <html>
 <head>
+    <title>世大運跑馬燈管理系統</title>
     <link rel="stylesheet" href="resources/css/tether.min.css" type="text/css"/>
     <link rel="stylesheet" href="resources/css/bootstrap.min.css" type="text/css"/>
     <link rel="stylesheet" href="resources/css/bootstrap-datetimepicker.min.css" type="text/css"/>
     <link rel="stylesheet" href="resources/css/bootstrap-dialog.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/bootstrap-table.min.css" type="text/css"/>
     <link rel="stylesheet" href="resources/css/index.css" type="text/css"/>
-
 
     <script src="resources/js/jquery-1.11.3.min.js"></script>
     <script src="resources/js/tether.min.js"></script>
@@ -13,167 +14,13 @@
     <script src="resources/js/moment.min.js"></script>
     <script src="resources/js/bootstrap-datetimepicker.min.js"></script>
     <script src="resources/js/bootstrap-dialog.min.js"></script>
-
-    <script>
-        function deleteRow(row, seq) {
-            $(row).closest("tr").remove();
-
-            fetch("/del/"+seq, {
-                method: 'GET'
-            }).then(function(response) {
-                if (!response.ok) {
-                    throw new Error(response.statusText)
-                }
-                return response.json();
-            }).catch(function(err) {
-                alert(err);
-            });
-        }
-
-        function showDialog(action, seq) {
-            var dialogTitle;
-            var url;
-            var dialogType;
-            var btnClass;
-            var btnLabel;
-            if (action == 'add') {
-                dialogType = BootstrapDialog.TYPE_SUCCESS;
-                dialogTitle = '新增跑馬燈內容';
-                url = '/add';
-                btnClass = 'btn-success';
-                btnLabel = '新增';
-            } else if (action == 'edit') {
-                dialogType = BootstrapDialog.TYPE_INFO;
-                dialogTitle = '修改跑馬燈內容';
-                url = '/edit/'+seq;
-                btnClass = 'btn-info';
-                btnLabel = ' 修改';
-            }
-
-            BootstrapDialog.show({
-                type: dialogType,
-                size: BootstrapDialog.SIZE_WIDE,
-                title: dialogTitle,
-                message: function(dialogRef) {
-                    var $message = $('<div><div class="alert alert-danger" role="alert" style="display: none;"></div></div>');
-                    var $content = $('temp #createMarqueeDialog').clone();
-                    $message.append($content);
-                    return $message;
-                },
-                closable: true,
-                draggable: true,
-                onshow: function(dialogRef) {
-                    if (action == 'edit') {
-                        fetch(url, {
-                            method: 'GET'
-                        }).then(function(response) {
-                            if (!response.ok) {
-                                throw new Error(response.statusText)
-                            }
-                            return response.json();
-                        }).then(function(jsonData) {
-                            dialogRef.$modalBody.find("#title")[0].value = jsonData.data.Title;
-                            dialogRef.$modalBody.find("#start")[0].value = jsonData.data.StartTime;
-                            dialogRef.$modalBody.find("#end")[0].value = jsonData.data.EndTime;
-                        }).catch(function(err) {
-                            alert(err);
-                        });
-                    }
-
-                    dialogRef.$modalBody.find('.datetimepicker').each(function(index) {
-                        $(this).datetimepicker({
-                            useCurrent: true,
-                            sideBySide: true,
-                            format:'YYYY-MM-DD HH:mm:ss'
-                        });
-                    });
-                },
-                buttons:[{
-                    label: btnLabel,
-                    cssClass: btnClass,
-
-                    action: function(dialogRef) {
-                        fetch(url, {
-                            method: 'POST',
-                            headers: new Headers({
-                                'Content-Type': 'application/json'
-                            }),
-                            body: JSON.stringify({
-                                title: dialogRef.$modalBody.find('#title')[0].value,
-                                start_time: dialogRef.$modalBody.find('#start')[0].value,
-                                end_time: dialogRef.$modalBody.find('#end')[0].value
-                            })
-                        }).then(function(response) {
-                            if (!response.ok) {
-                                throw new Error(response.statusText)
-                            }
-                            return response.json();
-                        }).then(function(jsonData) {
-                            dialogRef.close();
-                        }).catch(function(err) {
-                            alert(err);
-                        });
-                    }
-                }, {
-                    label: '取消',
-                    action: function(dialogRef) {
-                        dialogRef.close();
-                    }
-                }]
-            });
-        }
-
-        function migrateBootstrapV4() {
-            /* Renamed .btn-default to .btn-secondary. */
-            $('.btn-default').removeClass('btn-default').addClass('btn-secondary');
-            /* Added .float-{xs,sm,md,lg,xl}-{left,right,none} classes for responsive floats and
-             removed .pull-left and .pull-right since they’re redundant to .float-xs-left and .float-xs-right. */
-            $('.pull-left').removeClass('pull-left').addClass('float-xs-left');
-            $('.pull-right').removeClass('pull-right').addClass('float-xs-right');
-            /* Explicit classes (.page-item, .page-link) are now required on the descendants of .paginations */
-            $('.page-pre').addClass('page-item');
-            $('.page-next').addClass('page-item');
-            $('.page-number').addClass('page-item');
-            $('.page-first').addClass('page-item');
-            $('.page-first-separator').addClass('page-item');
-            $('.page-last').addClass('page-item');
-            $('.page-last-separator').addClass('page-item');
-            $('.page-item').find('a').addClass('page-link');
-            /* Dropdown items now require .dropdown-item. */
-            $('.dropdown-menu').find('li').find('a').addClass('dropdown-item');
-            /* Dropped .help-block and replaced it with .form-text for block-level help text. */
-            //$('.help-block').addClass('text-danger');
-        }
-
-        $(function() {
-            //migrateBootstrapV4();
-        });
-    </script>
+    <script src="resources/js/bootstrap-table.min.js"></script>
+    <script src="resources/js/Sortable.min.js"></script>
 </head>
 <body>
 <div class="container">
     <button id="btn_create" class="btn btn-success" onclick="showDialog('add')">新增</button>
-    <table class="table table-striped" id="m_table">
-        <tr>
-            <th>序號</th>
-            <th>內容</th>
-            <th>開始時間</th>
-            <th>結束時間</th>
-            <th>管理</th>
-        </tr>
-        {{ range .marquees }}
-        <tr id="row-{{.Seq}}">
-            <td>{{.Seq}}</td>
-            <td>{{.Title}}</td>
-            <td>{{.StartTime}}</td>
-            <td>{{.EndTime}}</td>
-            <td>
-                <button class="btn btn-danger" onclick="deleteRow(this, '{{.Seq}}')">刪除</button>
-                <button class="btn btn-info" onclick="showDialog('edit', '{{.Seq}}')">編輯</button>
-            </td>
-        </tr>
-        {{ end }}
-    </table>
+    <table id="table"></table>
 </div>
 <temp style="display:none;">
     <div id="createMarqueeDialog">
@@ -183,7 +30,7 @@
         </div>
         <div class="form-group date">
             <label>開始時間</label>
-            <div class='input-group date datetimepicker'>
+            <div class='input-group datetimepicker'>
                 <input type="text" class="form-control" id="start" />
                 <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
@@ -192,7 +39,7 @@
         </div>
         <div class="form-group date">
             <label>結束時間</label>
-            <div class='input-group date datetimepicker'>
+            <div class='input-group datetimepicker'>
                 <input type="text" class="form-control" id="end" />
                 <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
@@ -202,7 +49,194 @@
 
     </div>
 </temp>
+<script>
+    function initBootstrapTable() {
+        $('#table').bootstrapTable({
+            url:'/data',
+            columns:[{
+                field:'seq',
+                title:'序號',
+                align:'center',
+                valign:'middle'
+            }, {
+                field:'title',
+                title:'跑馬燈內容',
+                valign:'middle'
+            }, {
+                field:'start_time',
+                title:'開始時間',
+                align:'center',
+                valign:'middle'
+            }, {
+                field:'end_time',
+                title:'結束時間',
+                align:'center',
+                valign:'middle'
+            }, {
+                field: 'adv_op',
+                title: '進階操作',
+                valign: 'middle',
+                formatter: function (value, row, index) {
+                    return '<button class="btn btn-info" onclick="showDialog(\'edit\', \'' + row.seq + '\')">編輯</button>&nbsp' +
+                        '<button class="btn btn-danger" onclick="deleteRow(this, \'' + row.seq + '\')">刪除</button>';
+                }
+            }],
+//            }, {
+//                field:'sort',
+//                title:'排序',
+//                align:'center',
+//                valign:'middle',
+//                formatter: function(value, row, index) {
+//                    return '<span class="glyphicon glyphicon-sort" aria-hidden="true"></span>';
+//                },
+//                cellStyle: function(value, row, index, field) {
+//                    return {classes:'dragHandle'};
+//                }
+//            }],
+            striped: true,
+            rowAttributes: function(row, index) {
+                return {'data-seq':row.seq};
+            },
+            onPostBody: function(data) {
+                //initSortable();
+            },
+            //pagination:true,
+        });
+    }
 
+    function initSortable() {
+        var container = $("#table tbody")[0];
+        var tableSortable = Sortable.create(container, {
+            group:'marquee',
+            animation: 150,
+            handle: '.dragHandle',
+            onUpdate: function(evt) {
+                console.dir(evt.newIndex);
+                console.dir(evt.oldIndex);
+                console.dir(evt.item.dataset.seq);
+            }
+        });
+    }
+
+    function deleteRow(row, seq) {
+        fetch("/del/"+seq, {
+            method: 'GET'
+        }).then(function(response) {
+            if (!response.ok) {
+                throw new Error(response.statusText)
+            }
+            return response.json();
+        }).then (function(response) {
+            refreshTable();
+        }).catch(function(err) {
+            alert(err);
+        });
+    }
+
+    function showDialog(action, seq) {
+        var dialogTitle;
+        var url;
+        var dialogType;
+        var btnClass;
+        var btnLabel;
+        if (action == 'add') {
+            dialogType = BootstrapDialog.TYPE_SUCCESS;
+            dialogTitle = '新增跑馬燈內容';
+            url = '/add';
+            btnClass = 'btn-success';
+            btnLabel = '新增';
+        } else if (action == 'edit') {
+            dialogType = BootstrapDialog.TYPE_INFO;
+            dialogTitle = '修改跑馬燈內容';
+            url = '/edit/'+seq;
+            btnClass = 'btn-info';
+            btnLabel = ' 修改';
+        }
+
+        BootstrapDialog.show({
+            type: dialogType,
+            size: BootstrapDialog.SIZE_WIDE,
+            title: dialogTitle,
+            message: function(dialogRef) {
+                var $message = $('<div><div class="alert alert-danger" role="alert" style="display: none;"></div></div>');
+                var $content = $('temp #createMarqueeDialog').clone();
+                $message.append($content);
+                return $message;
+            },
+            closable: true,
+            draggable: true,
+            onshow: function(dialogRef) {
+                if (action == 'edit') {
+                    fetch(url, {
+                        method: 'GET'
+                    }).then(function(response) {
+                        if (!response.ok) {
+                            throw new Error(response.statusText)
+                        }
+                        return response.json();
+                    }).then(function(jsonData) {
+                        dialogRef.$modalBody.find("#title")[0].value = jsonData.data.title;
+                        dialogRef.$modalBody.find("#start")[0].value = jsonData.data.start_time;
+                        dialogRef.$modalBody.find("#end")[0].value = jsonData.data.end_time;
+                    }).catch(function(err) {
+                        alert(err);
+                    });
+                }
+
+                dialogRef.$modalBody.find('.datetimepicker').each(function(index) {
+                    $(this).datetimepicker({
+                        useCurrent: true,
+                        sideBySide: true,
+                        format:'YYYY-MM-DD HH:mm:ss'
+                    });
+                });
+            },
+            buttons:[{
+                label: btnLabel,
+                cssClass: btnClass,
+
+                action: function(dialogRef) {
+                    fetch(url, {
+                        method: 'POST',
+                        headers: new Headers({
+                            'Content-Type': 'application/json'
+                        }),
+                        body: JSON.stringify({
+                            title: dialogRef.$modalBody.find('#title')[0].value,
+                            start_time: dialogRef.$modalBody.find('#start')[0].value,
+                            end_time: dialogRef.$modalBody.find('#end')[0].value
+                        })
+                    }).then(function(response) {
+                        if (!response.ok) {
+                            throw new Error(response.statusText)
+                        }
+                        return response.json();
+                    }).then(function(jsonData) {
+                        dialogRef.close();
+                        refreshTable();
+                    }).catch(function(err) {
+                        alert(err);
+                    });
+                }
+            }, {
+                label: '取消',
+                action: function(dialogRef) {
+                    dialogRef.close();
+                }
+            }]
+        });
+    }
+
+    function refreshTable() {
+        $('#table').bootstrapTable('refresh', {
+            silent:true
+        })
+    }
+
+    $(function() {
+        initBootstrapTable();
+    });
+</script>
 </body>
 
 </html>

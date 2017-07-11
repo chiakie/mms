@@ -7,10 +7,10 @@ import (
 )
 
 type Marquee struct {
-	Seq int `gorm:"primary_key"`
-	Title string
-	StartTime string
-	EndTime string
+	Seq int `gorm:"primary_key" json:"seq"`
+	Title string `json:"title"`
+	StartTime string `json:"start_time"`
+	EndTime string `json:"end_time"`
 }
 
 var gdb *gorm.DB
