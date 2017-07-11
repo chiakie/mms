@@ -7,3 +7,5 @@
 6. [Bootstrap-dialog](https://github.com/nakupanda/bootstrap3-dialog)
 7. [Bootstrap-datetimepicker](https://github.com/Eonasdan/bootstrap-datetimepicker)
 8. [Bootstrap-table](https://github.com/wenzhixin/bootstrap-table)
+9. [Bootstrap-Validator](http://1000hz.github.io/bootstrap-validator/#validator-markup)
+10. [Sortable](https://github.com/RubaXa/Sortable)
