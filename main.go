@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gopkg.in/gin-gonic/gin.v1"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"fmt"
 	"encoding/json"
@@ -13,7 +13,7 @@ import (
 func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
-	router.StaticFS("/resources", gin.Dir("resources", false))
+	router.Static("/resources", "./resources")
 
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{})
