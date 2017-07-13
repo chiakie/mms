@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="resources/css/tether.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/bootstrap-dialog.min.css" type="text/css"/>
+
+    <script src="resources/js/jquery-1.11.3.min.js"></script>
+    <script src="resources/js/tether.min.js"></script>
+    <script src="resources/js/bootstrap.min.js"></script>
+    <script src="resources/js/bootstrap-dialog.min.js"></script>
+    <script src="resources/js/validator.min.js"></script>
+
+    <style>
+        .panel {
+            width:300px;
+            margin: 150px auto;
+        }
+
+        form#user .form-group {
+            width:50%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        世大運跑馬燈管理系統 - 登入
+    </div>
+    <div class="panel-body">
+        <form id="login" method="post" action="/login" data-toggle="validator">
+            <div class="form-group">
+                <input type="text" class="form-control" name="username" placeholder="使用者帳號" data-error="*帳號不可為空" required/>
+                <div class="help-block with-errors"></div>
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" name="password" placeholder="使用者密碼" data-error="*密碼不可為空" required/>
+                <div class="help-block with-errors"></div>
+            </div>
+            <div class="form-group" style="text-align:center;">
+                <button type="submit" class="btn btn-primary">登入</button>
+                <button id="signUpBtn" class="btn btn-info">註冊</button>
+            </div>
+        </form>
+    </div>
+</div>
+<temp style="display:none;">
+    <div id="createUserDialog">
+        <form id="user">
+            <div class="form-group ">
+                <label>使用者帳號</label>
+                <input type="text" class="form-control" id="username" maxlength="64" data-error="*此為必填欄位" required/>
+                <div class="help-block with-errors"></div>
+            </div>
+            <div class="form-group">
+                <label>使用者密碼</label>
+                <input type="password" class="form-control" id="password" maxlength="64" data-error="*此為必填欄位" required/>
+                <div class="help-block with-errors"></div>
+            </div>
+        </form>
+    </div>
+</temp>
+<script>
+    $('#signUpBtn').click(function(e) {
+        e.preventDefault();
+
+        BootstrapDialog.show({
+            type: BootstrapDialog.TYPE_INFO,
+            size: BootstrapDialog.SIZE_NORMAL,
+            title: "新增使用者",
+            message: function(dialogRef) {
+                var $message = $('<div><div class="alert alert-danger" role="alert" style="display: none;"></div></div>');
+                var $content = $('temp #createUserDialog').clone();
+                $message.append($content);
+                return $message;
+            },
+            closable: true,
+            draggable: true,
+            onshow: function(dialogRef) {
+                dialogRef.$modalBody.find('#user').first().validator();
+            },
+            buttons:[{
+                label: "新增",
+                cssClass: "btn-info",
+                action: function(dialogRef) {
+                    if (dialogRef.$modalBody.find('#user').first().validator('validate').has('.has-error').length > 0) {
+                        return; /* See https://github.com/1000hz/bootstrap-validator/issues/148 */
+                    }
+
+                    fetch("/user/add", {
+                        method: 'POST',
+                        headers: new Headers({
+                            'Content-Type': 'application/json'
+                        }),
+                        body: JSON.stringify({
+                            username: dialogRef.$modalBody.find('#username')[0].value,
+                            password: dialogRef.$modalBody.find('#password')[0].value
+                        })
+                    }).then(function(response) {
+                        if (!response.ok) {
+                            throw new Error(response.statusText)
+                        }
+                        return response.json();
+                    }).then(function(jsonData) {
+                        dialogRef.close();
+                    }).catch(function(err) {
+                        alert(err);
+                    });
+                }
+            }, {
+                label: '取消',
+                action: function(dialogRef) {
+                    dialogRef.close();
+                }
+            }]
+        });
+    })
+</script>
+
+</body>
+</html>

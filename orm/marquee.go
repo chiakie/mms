@@ -1,8 +1,6 @@
 package orm
 
 import (
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"fmt"
 )
 
@@ -13,22 +11,7 @@ type Marquee struct {
 	EndTime string `json:"end_time"`
 }
 
-var gdb *gorm.DB
-
-func init() {
-	var err error
-	gdb, err = gorm.Open("sqlite3", "marquee.db");
-	if err != nil {
-		panic("failed to connect database")
-	}
-
-	err = gdb.AutoMigrate(Marquee{}).Error
-	if err != nil {
-		panic(fmt.Sprintf("AutoMigration Failed: %s", err))
-	}
-}
-
-// set User's table name to be `profiles`
+// set User's table name to be `marquee`
 func (Marquee) TableName() string {
 	return "marquee"
 }

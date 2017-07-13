@@ -2,22 +2,56 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/sessions"
 	"net/http"
 	"fmt"
 	"encoding/json"
 	"mms/orm"
 	"strconv"
+	"strings"
 	"mms/domain"
 )
 
+func CheckUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		session := sessions.Default(c)
+
+		if result := strings.Compare(c.Request.URL.Path, "/login"); result != 0 {
+			username := session.Get("username")
+			if username == nil {
+				c.Redirect(http.StatusSeeOther, "/login")
+			}
+		}
+
+		c.Next()
+	}
+}
+
 func main() {
 	router := gin.Default()
+	// MW: enable cookie-based session
+	store := sessions.NewCookieStore([]byte("secret"))
+	store.Options(sessions.Options{MaxAge:300}) // 10 minutes to expire
+	router.Use(sessions.Sessions("MarqueeSession", store))
+
+	// MW: check user
+	router.Use(CheckUser())
+
+	// views and resources
 	router.LoadHTMLGlob("templates/*")
 	router.Static("/resources", "./resources")
+
+
 
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{})
 	})
+
+	router.GET("/login", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "login.html", gin.H{})
+	})
+	router.POST("/login", Login)
+	router.POST("/user/add", AddUser)
 
 	router.GET("/data", func(c *gin.Context) {
 		data := orm.GetMarquees()
