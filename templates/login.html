@@ -98,7 +98,8 @@
                         body: JSON.stringify({
                             username: dialogRef.$modalBody.find('#username')[0].value,
                             password: dialogRef.$modalBody.find('#password')[0].value
-                        })
+                        }),
+                        credentials: 'same-origin'
                     }).then(function(response) {
                         if (!response.ok) {
                             throw new Error(response.statusText)

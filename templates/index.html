@@ -174,7 +174,8 @@
                 dialogRef.$modalBody.find('#form').first().validator();
                 if (action == 'edit') {
                     fetch(url, {
-                        method: 'GET'
+                        method: 'GET',
+                        credentials: 'same-origin'
                     }).then(function(response) {
                         if (!response.ok) {
                             throw new Error(response.statusText)
@@ -214,7 +215,8 @@
                             title: dialogRef.$modalBody.find('#title')[0].value,
                             start_time: dialogRef.$modalBody.find('#start')[0].value,
                             end_time: dialogRef.$modalBody.find('#end')[0].value
-                        })
+                        }),
+                        credentials: 'same-origin'
                     }).then(function(response) {
                         if (!response.ok) {
                             throw new Error(response.statusText)
