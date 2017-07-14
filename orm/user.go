@@ -14,16 +14,17 @@ func (User) TableName() string {
 	return "user"
 }
 
-func GetSingleUser(name string) User {
+func GetSingleUser(name string) (User, error) {
 	var user User
-	if err := gdb.Where("username = ?", name).First(&user).Error; err != nil {
-		panic(fmt.Sprintf("Username \"%s\" is not valid.", name))
+	err := gdb.Where("username = ?", name).First(&user).Error
+	if err != nil {
+		fmt.Println(fmt.Sprintf("Username \"%s\" is not valid.", name))
 	}
 
-	return user
+	return user, err
 }
 
-func AddUser(name string, password string) {
+func AddUser(name string, password string) error {
 	var user User
 	user.Username = name
 	user.Password = password
@@ -32,5 +33,7 @@ func AddUser(name string, password string) {
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
+
+	return err
 }
 

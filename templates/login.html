@@ -105,7 +105,13 @@
                         }
                         return response.json();
                     }).then(function(jsonData) {
-                        dialogRef.close();
+                        if (jsonData.result == 'ok') {
+                            dialogRef.close();
+                        } else {
+                            var $msg = dialogRef.$modalBody.find("div.alert").first();
+                            $msg.html(jsonData.message);
+                            $msg.show();
+                        }
                     }).catch(function(err) {
                         alert(err);
                     });

@@ -23,7 +23,7 @@ func Login(c *gin.Context) {
 	if err := c.Bind(&form); err != nil {
 		c.JSON(http.StatusOK, gin.H{"result":"Form binding error!"})
 	} else {
-		user := orm.GetSingleUser(form.Username)
+		user, _ := orm.GetSingleUser(form.Username)
 
 		passwordSha, err := sha([]byte(form.Password))
 		if err != nil {
@@ -31,7 +31,7 @@ func Login(c *gin.Context) {
 		}
 
 		if result := strings.Compare(user.Password, passwordSha); result != 0 {
-			c.JSON(http.StatusOK, gin.H{"result":"帳號或密碼輸入錯誤!"})
+			c.JSON(http.StatusOK, gin.H{"result":"failed", "message":"帳號或密碼輸入錯誤!"})
 		} else {
 			session.Set("username", form.Username)
 			session.Save()
@@ -43,11 +43,19 @@ func Login(c *gin.Context) {
 func AddUser(c *gin.Context) {
 	var userAdd UserLogin
 	if err := c.Bind(&userAdd); err != nil {
-		c.JSON(http.StatusOK, gin.H{"result":"Form binding error!"})
+		c.JSON(http.StatusOK, gin.H{"result":"failed", "message":"Form binding error!"})
 	} else {
 		passwordSha, _ := sha([]byte(userAdd.Password))
-		orm.AddUser(userAdd.Username, passwordSha)
-		c.JSON(http.StatusOK, gin.H{"result":"OK"})
+		err = orm.AddUser(userAdd.Username, passwordSha)
+		if err != nil {
+			if strings.Contains(err.Error(), "UNIQUE") {
+				c.JSON(http.StatusOK, gin.H{"result":"failed", "message":userAdd.Username + "此帳號已存在!"})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"result":"failed", "message":err.Error()})
+			}
+		} else {
+			c.JSON(http.StatusOK, gin.H{"result":"ok"})
+		}
 	}
 }
 

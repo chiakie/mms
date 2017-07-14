@@ -16,15 +16,29 @@ func CheckUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
 
-		if result := strings.Compare(c.Request.URL.Path, "/login"); result != 0 {
+		if !skip(c.Request.URL.Path) {
 			username := session.Get("username")
 			if username == nil {
 				c.Redirect(http.StatusSeeOther, "/login")
 			}
 		}
-
+		/* ↑↑↑↑↑ Before request */
 		c.Next()
+		/* ↓↓↓↓↓ After request  */
 	}
+}
+
+func skip(path string) bool {
+
+	if strings.Contains(path, "/resources") {
+		return true
+	}
+
+	if strings.Contains(path, "/login") {
+		return true
+	}
+
+	return false;
 }
 
 func main() {
