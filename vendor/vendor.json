@@ -49,6 +49,12 @@
 			"revisionTime": "2017-07-06T22:48:25Z"
 		},
 		{
+			"checksumSHA1": "uQ2Y8NmET3/sw7dPfjam63xQzqc=",
+			"path": "github.com/gin-contrib/multitemplate",
+			"revision": "016771ffc9aada53626124d29baf70af369232f8",
+			"revisionTime": "2017-07-07T01:50:44Z"
+		},
+		{
 			"checksumSHA1": "RAFMWm/Z+RamMAAhMWNT9IAiBME=",
 			"path": "github.com/gin-contrib/sessions",
 			"revision": "227bb6c9c4d414dc87160512d271788ed918e7ef",

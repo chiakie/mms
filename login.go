@@ -70,3 +70,11 @@ func sha(secret []byte) (string, error) {
 	sha := base64.URLEncoding.EncodeToString(h.Sum(nil))
 	return sha, nil
 }
+
+func Logout(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Delete("username")
+	session.Save()
+
+	c.Redirect(http.StatusSeeOther, "/login")
+}

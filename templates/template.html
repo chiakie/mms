@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <title>世大運跑馬燈管理系統</title>
+    <link rel="stylesheet" href="resources/css/tether.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/bootstrap-datetimepicker.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/bootstrap-dialog.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/bootstrap-table.min.css" type="text/css"/>
+    <link rel="stylesheet" href="resources/css/index.css" type="text/css"/>
+    {{template "style" .}}
+</head>
+<body>
+{{template "header" .}}
+<div class="container">
+    <div style="min-height:75vh">
+        {{template "content" .}}
+    </div>
+    {{template "footer" .}}
+</div>
+
+<script src="resources/js/jquery-1.11.3.min.js"></script>
+<script src="resources/js/tether.min.js"></script>
+<script src="resources/js/bootstrap.min.js"></script>
+<script src="resources/js/moment.min.js"></script>
+<script src="resources/js/bootstrap-datetimepicker.min.js"></script>
+<script src="resources/js/bootstrap-dialog.min.js"></script>
+<script src="resources/js/bootstrap-table.min.js"></script>
+<script src="resources/js/validator.min.js"></script>
+<!--<script src="resources/js/Sortable.min.js"></script>-->
+{{template "script" .}}
+</body>
+</html>

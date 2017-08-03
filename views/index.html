@@ -1,28 +1,9 @@
-<html>
-<head>
-    <title>世大運跑馬燈管理系統</title>
-    <link rel="stylesheet" href="resources/css/tether.min.css" type="text/css"/>
-    <link rel="stylesheet" href="resources/css/bootstrap.min.css" type="text/css"/>
-    <link rel="stylesheet" href="resources/css/bootstrap-datetimepicker.min.css" type="text/css"/>
-    <link rel="stylesheet" href="resources/css/bootstrap-dialog.min.css" type="text/css"/>
-    <link rel="stylesheet" href="resources/css/bootstrap-table.min.css" type="text/css"/>
-    <link rel="stylesheet" href="resources/css/index.css" type="text/css"/>
+{{define "style"}}
+{{end}}
 
-    <script src="resources/js/jquery-1.11.3.min.js"></script>
-    <script src="resources/js/tether.min.js"></script>
-    <script src="resources/js/bootstrap.min.js"></script>
-    <script src="resources/js/moment.min.js"></script>
-    <script src="resources/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="resources/js/bootstrap-dialog.min.js"></script>
-    <script src="resources/js/bootstrap-table.min.js"></script>
-    <script src="resources/js/validator.min.js"></script>
-    <!--<script src="resources/js/Sortable.min.js"></script>-->
-</head>
-<body>
-<div class="container">
-    <button id="btn_create" class="btn btn-success" onclick="showDialog('add')">新增</button>
-    <table id="table"></table>
-</div>
+{{define "content"}}
+<button id="btn_create" class="btn btn-success" onclick="showDialog('add')">新增</button>
+<table id="table"></table>
 <temp style="display:none;">
     <div id="createMarqueeDialog">
         <form id="form">
@@ -54,6 +35,9 @@
         </form>
     </div>
 </temp>
+{{end}}
+
+{{define "script"}}
 <script>
     function initBootstrapTable() {
         $('#table').bootstrapTable({
@@ -125,7 +109,8 @@
 
     function deleteRow(row, seq) {
         fetch("/del/"+seq, {
-            method: 'GET'
+            method: 'GET',
+            credentials: 'same-origin'
         }).then(function(response) {
             if (!response.ok) {
                 throw new Error(response.statusText)
@@ -246,6 +231,4 @@
         initBootstrapTable();
     });
 </script>
-</body>
-
-</html>
+{{end}}

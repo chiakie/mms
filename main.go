@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"mms/domain"
+	"github.com/gin-contrib/multitemplate"
+	"path/filepath"
 )
 
 func CheckUser() gin.HandlerFunc {
@@ -38,7 +40,27 @@ func skip(path string) bool {
 		return true
 	}
 
-	return false;
+	return false
+}
+
+func createRender(viewNames []string) multitemplate.Render {
+	render := multitemplate.New()
+
+	for _, name_in := range viewNames {
+		extension := filepath.Ext(name_in)
+		name_out := strings.TrimSuffix(name_in, extension)
+		if len(extension) == 0 {
+			extension = "html"
+		}
+
+		render.AddFromFiles(name_out,
+			"templates/template.html",
+			"templates/header.html",
+			"templates/footer.html",
+			"views/" + name_out + "." + extension)
+	}
+
+	return render
 }
 
 func main() {
@@ -52,19 +74,24 @@ func main() {
 	router.Use(CheckUser())
 
 	// views and resources
-	router.LoadHTMLGlob("templates/*")
+	//router.LoadHTMLGlob("templates/*")
+	router.HTMLRender = createRender([]string{"index", "login"})
 	router.Static("/resources", "./resources")
 
-
-
 	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{})
+		session := sessions.Default(c)
+		username := session.Get("username")
+		c.HTML(http.StatusOK, "index", gin.H{"username":username})
 	})
 
 	router.GET("/login", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "login.html", gin.H{})
+		c.HTML(http.StatusOK, "login", gin.H{})
 	})
+	
 	router.POST("/login", Login)
+
+	router.GET("/logout", Logout)
+
 	router.POST("/user/add", AddUser)
 
 	router.GET("/data", func(c *gin.Context) {

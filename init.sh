@@ -9,6 +9,7 @@ govendor init
 # gin related
 govendor fetch github.com/gin-gonic/gin
 govendor fetch github.com/gin-contrib/sessions
+govendor fetch github.com/gin-contrib/multitemplate
 
 # database related
 govendor fetch github.com/mattn/go-sqlite3

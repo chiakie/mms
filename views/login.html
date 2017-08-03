@@ -1,31 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-    <link rel="stylesheet" href="resources/css/tether.min.css" type="text/css"/>
-    <link rel="stylesheet" href="resources/css/bootstrap.min.css" type="text/css"/>
-    <link rel="stylesheet" href="resources/css/bootstrap-dialog.min.css" type="text/css"/>
+{{define "style"}}
+<style>
+    .panel {
+        width: 300px;
+        margin: 150px auto;
+    }
 
-    <script src="resources/js/jquery-1.11.3.min.js"></script>
-    <script src="resources/js/tether.min.js"></script>
-    <script src="resources/js/bootstrap.min.js"></script>
-    <script src="resources/js/bootstrap-dialog.min.js"></script>
-    <script src="resources/js/validator.min.js"></script>
+    form#user .form-group {
+        width: 50%;
+    }
+</style>
+{{end}}
 
-    <style>
-        .panel {
-            width:300px;
-            margin: 150px auto;
-        }
-
-        form#user .form-group {
-            width:50%;
-        }
-    </style>
-</head>
-<body>
-
+{{define "content"}}
 <div class="panel panel-primary">
     <div class="panel-heading">
         世大運跑馬燈管理系統 - 登入
@@ -63,6 +49,9 @@
         </form>
     </div>
 </temp>
+{{end}}
+
+{{define "script"}}
 <script>
     $('#signUpBtn').click(function(e) {
         e.preventDefault();
@@ -126,6 +115,4 @@
         });
     })
 </script>
-
-</body>
-</html>
+{{end}}
